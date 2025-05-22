@@ -1,22 +1,20 @@
 // server.js
+const express = require('express');
 const http = require('http');
-const WebSocket = require('ws');
+const { Server } = require("socket.io");
+const path = require('path');
 
-const server = http.createServer();
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', function connection(ws) {
-    console.log('Client connected');
-    ws.on('message', function message(data) {
-        console.log('received:', data);
-        ws.send('Echo: ' + data);
-    });
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { // Allow connections from different origins (like your WebGL client)
+        origin: "*", // Be more specific in production!
+        methods: ["GET", "POST"]
+    }
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000; // Use environment variable or default to 3000
+
 // --- Game State (Simple Example) ---
 let rooms = {}; // Store room information { roomCode: { gameSocketId: null, players: {} } }
 let nextPlayerId = 0;
