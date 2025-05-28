@@ -1,11 +1,19 @@
 // server.js
 const express = require('express');
 const http = require('http');
+const cors = require("cors");
 const { Server } = require("socket.io");
 const path = require('path');
 
 const app = express();
+
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+}));
+
 const server = http.createServer(app);
+
 const io = new Server(server, {
     cors: { // Allow connections from different origins (like your WebGL client)
         origin: "*", // Be more specific in production!
