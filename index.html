@@ -165,13 +165,14 @@
           }
 
           function sendInputWebGL(inputType, valueJson) {
-              const value = JSON.parse(valueJson);
+              //const value = JSON.parse(valueJson);
               socket.emit("playerInput", {
                   inputType,
-                  value,
+                  value: valueJson,
                   roomCode: window.RoomCode,
-                  playerId: window.playerId
+                  playerId: window.playerId //Send global variable
               });
+              console.log(window.playerId);
           }
 
           socket.on("unityEvent", (data) => {
@@ -199,12 +200,11 @@
 
           socket.on("AssignCharacter", (data) => {
               if (window.unityInstance) {
-                  window.playerId = data.multiplayerPlayerNumber;
+                  window.playerId = data.multiplayerPlayerNumber; //set global variable player id
                   window.unityInstance.SendMessage("NetworkManager", "OnWebGLAssignCharacter", JSON.stringify(data));
               }
           });
 
-          // You may want to store roomCode/playerId globally after successful join
           socket.on("connect", () => console.log("WebGL Connected"));
       </script>
   </body>
