@@ -175,35 +175,45 @@
               console.log(window.playerId);
           }
 
-          socket.on("unityEvent", (data) => {
-              console.log("Received message from main game:", data);
+          // Utility function to forward socket events to Unity
+          function forwardToUnity(socketEvent, unityMethod, options = {}) {
+              socket.on(socketEvent, (data) => {
+                  if (options.log) {
+                      console.log(`Got ${socketEvent} event:`, data);
+                  }
 
-              // Relay to Unity via SendMessage
-              if (window.unityInstance) {
-                  window.unityInstance.SendMessage("NetworkManager", "OnWebGLUnityEvent", JSON.stringify(data));
-              }
+                  if (window.unityInstance) {
+                      window.unityInstance.SendMessage(
+                          "NetworkManager",
+                          unityMethod,
+                          JSON.stringify(data)
+                      );
+                  }
+
+                  if (typeof options.after === "function") {
+                      options.after(data);
+                  }
+              });
+          }
+
+          // Register events
+          forwardToUnity("unityEvent", "OnWebGLUnityEvent", { log: true });
+          forwardToUnity("loadScene", "OnWebGLLoadScene", { log: true });
+          forwardToUnity("receiveCards", "OnWebGLRecieveCards");
+          forwardToUnity("giveExtraCards", "OnWebGLGiveExtraCards");
+          forwardToUnity("invent", "OnWebGLInvent");
+          forwardToUnity("AssignCharacter", "OnWebGLAssignCharacter", {
+              after: (data) => { window.playerId = data.playerId; }
           });
+          forwardToUnity("PullJourney", "OnWebGLPullJourney");
+          forwardToUnity("PickDestination", "OnWebGLPickDestination");
+          forwardToUnity("performChallenge", "OnWebGLPerformChallenge");
+          forwardToUnity("recieveHelp", "OnWebGLRecieveHelp");
+          forwardToUnity("getHelpRevoked", "OnWebGLGetHelpRevoked");
+          forwardToUnity("helpAndGiveOptions", "OnWebGLHelpAndGiveOptions");
+          forwardToUnity("addResources", "OnWebGLAddResources");
+          forwardToUnity("addItem", "OnWebGLAddItem");
 
-          socket.on("loadScene", (data) => {
-              console.log("Got loadScene event from main game:", data);
-
-              if (window.unityInstance) {
-                  window.unityInstance.SendMessage("NetworkManager", "OnWebGLLoadScene", JSON.stringify(data));
-              }
-          });
-
-          socket.on("receiveCards", (data) => {
-              if (window.unityInstance) {
-                  window.unityInstance.SendMessage("NetworkManager", "OnWebGLRecieveCards", JSON.stringify(data));
-              }
-          });
-
-          socket.on("AssignCharacter", (data) => {
-              if (window.unityInstance) {
-                  window.playerId = data.playerId; //set global variable player id
-                  window.unityInstance.SendMessage("NetworkManager", "OnWebGLAssignCharacter", JSON.stringify(data));
-              }
-          });
 
           socket.on("connect", () => console.log("WebGL Connected"));
       </script>
