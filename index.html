@@ -212,7 +212,9 @@
           forwardToUnity("getHelpRevoked", "OnWebGLGetHelpRevoked");
           forwardToUnity("helpAndGiveOptions", "OnWebGLHelpAndGiveOptions");
           forwardToUnity("addResources", "OnWebGLAddResources");
-          forwardToUnity("addItem", "OnWebGLAddItem");
+          forwardToUnity("addItem", "OnWebGLAddItem", {
+              after: (data) => { window.integer = data.playerId; }
+          });
 
 
           socket.on("connect", () => console.log("WebGL Connected"));
