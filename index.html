@@ -57,9 +57,9 @@
           var loaderUrl = buildUrl + "/WebGLbuild_28_05_25.loader.js";
           var config = {
               arguments: [],
-              dataUrl: buildUrl + "/WebGLbuild_28_05_25.data",
-              frameworkUrl: buildUrl + "/WebGLbuild_28_05_25.framework.js",
-              codeUrl: buildUrl + "/WebGLbuild_28_05_25.wasm",
+              dataUrl: buildUrl + "/WebGLbuild_04_09_25.data",
+              frameworkUrl: buildUrl + "/WebGLbuild_04_09_25.framework.js",
+              codeUrl: buildUrl + "/WebGLbuild_04_09_25.wasm",
               streamingAssetsUrl: "StreamingAssets",
               companyName: "Tom Vissenkom",
               productName: "Elysium Legacy",
@@ -170,7 +170,7 @@
                   inputType,
                   value: valueJson,
                   roomCode: window.RoomCode,
-                  playerId: window.playerId //Send global variable
+                  playerId: window.playerId
               });
               console.log(window.playerId);
           }
@@ -200,7 +200,7 @@
 
           socket.on("AssignCharacter", (data) => {
               if (window.unityInstance) {
-                  window.playerId = data.multiplayerPlayerNumber; //set global variable player id
+                  window.playerId = data.playerId; //set global variable player id
                   window.unityInstance.SendMessage("NetworkManager", "OnWebGLAssignCharacter", JSON.stringify(data));
               }
           });
