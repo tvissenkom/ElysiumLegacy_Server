@@ -210,7 +210,9 @@
           forwardToUnity("performChallenge", "OnWebGLPerformChallenge");
           forwardToUnity("recieveHelp", "OnWebGLRecieveHelp");
           forwardToUnity("getHelpRevoked", "OnWebGLGetHelpRevoked");
-          forwardToUnity("helpAndGiveOptions", "OnWebGLHelpAndGiveOptions");
+          forwardToUnity("helpAndGiveOptions", "OnWebGLHelpAndGiveOptions", {
+              after: (data) => data.map(d => d.playerId)
+          });
           forwardToUnity("addResources", "OnWebGLAddResources");
           forwardToUnity("addItem", "OnWebGLAddItem", {
               after: (data) => { window.integer = data.playerId; }
