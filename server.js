@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3000; // Use environment variable or default to
 
 // --- Game State (Simple Example) ---
 let rooms = {}; // Store room information { roomCode: { gameSocketId: null, players: {} } }
-let nextPlayerId = 0;
+let nextPlayerId = 1;
 
 // --- Serve the WebGL Client ---
 // Assumes your WebGL build is in a 'public' folder within your server directory
