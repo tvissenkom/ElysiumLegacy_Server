@@ -217,7 +217,7 @@
         forwardToUnity("addItem", "OnWebGLAddItem", {
             after: (data) => { window.integer = data.playerId; }
         });
-
+        forwardToUnity("invent", "OnWebGLpressItem");
 
         socket.on("connect", () => console.log("WebGL Connected"));
     </script>
