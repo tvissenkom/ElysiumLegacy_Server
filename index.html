@@ -200,7 +200,7 @@
         forwardToUnity("unityEvent", "OnWebGLUnityEvent", { log: true });
         forwardToUnity("loadScene", "OnWebGLLoadScene", { log: true });
         forwardToUnity("receiveCards", "OnWebGLRecieveCards");
-        forwardToUnity("giveExtraCards", "OnWebGLGiveExtraCards");
+        forwardToUnity("addCards", "OnWebGLAddCards");
         forwardToUnity("invent", "OnWebGLInvent");
         forwardToUnity("AssignCharacter", "OnWebGLAssignCharacter", {
             after: (data) => { window.playerId = data.playerId; }
