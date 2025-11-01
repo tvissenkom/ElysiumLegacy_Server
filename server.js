@@ -100,6 +100,45 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('reconnectPlayer', (data, callback) => {
+        if (!data || typeof data !== 'object') {
+            console.warn('Invalid reconnectPlayer payload:', data);
+            return callback?.({ success: false, message: 'Invalid payload' });
+        }
+        const { roomCode, playerId } = data;
+        const room = rooms[roomCode];
+
+        if (!room) {
+            return callback({ success: false, message: 'Room not found.' });
+        }
+
+        const player = room.players[playerId];
+        if (player && player.disconnected) {
+            player.socketId = socket.id;
+            player.disconnected = false;
+            socket.join(roomCode);
+
+            console.log(`Player ${playerId} reconnected to room ${roomCode}`);
+
+            // Notify the game client
+            const playerName = room.players[playerId].name;
+            io.to(room.gameSocketId).emit('playerJoined', {
+                playerId,
+                playerName,
+                //reconnected: true // optional flag
+            });
+
+            // Acknowledge to the player
+            callback({ success: true, playerId, playerName: player.name });
+        } else {
+            callback({ success: false, message: 'No matching disconnected player found.' });
+        }
+    });
+
+    socket.onAny((event, ...args) => {
+        console.log('Received event:', event, 'Args:', args);
+    });
+
     // Receive input from a player and forward it to the game client
     socket.on('playerInput', (data) => { // data = { roomCode, playerId, inputType, value }
         const room = rooms[data.roomCode];
@@ -138,13 +177,11 @@ io.on('connection', (socket) => {
             for (const playerId in room.players) {
                 if (room.players[playerId].socketId === socket.id) {
                     console.log(`Player ${playerId} disconnected from room ${roomCode}`);
-                    const playerName = room.players[playerId].name;
-                    delete room.players[playerId];
-                    // Notify the game client
-                    io.to(room.gameSocketId).emit('playerLeft', { playerId: playerId, playerName: playerName });
-                    // Optional: Notify other players
-                    socket.to(roomCode).except(room.gameSocketId).emit('otherPlayerLeft', { playerId: playerId, playerName: playerName });
-                    break; // Exit inner loop
+                    const player = room.players[playerId];
+                    player.disconnected = true;
+                    player.socketId = null; // Clear socket ID
+                    io.to(room.gameSocketId).emit('playerDisconnected', { playerId, playerName: player.name });
+                    break;
                 }
             }
         }

@@ -24,6 +24,7 @@
         </div>
     </div>
     <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+    <script src="https://unpkg.com/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
     <script>
 
         var canvas = document.querySelector("#unity-canvas");
@@ -164,6 +165,25 @@
             });
         }
 
+        function reconnect(roomCode, playerName) {
+            socket.emit('reconnectPlayer', { roomCode, playerId }, (response) => {
+                if (response.success) {
+                    console.log("Reconnected as", response.playerName);
+                } else {
+                    console.log("Reconnection failed, joining as new player...");
+                    socket.emit('joinRoom', { roomCode, playerName }, handleJoinResponse);
+                }
+            });
+        }
+
+        function reconnectPlayerWebGL(roomCode, playerId) {
+            socket.emit("reconnectPlayer", { roomCode, playerId }, (response) => {
+                window.RoomCode = roomCode;
+                const jsonResponse = JSON.stringify(response);
+                window.unityInstance.SendMessage("NetworkManager", "OnWebGLReconnectResponse", jsonResponse);
+            });
+        }
+
         function sendInputWebGL(inputType, valueJson) {
             //const value = JSON.parse(valueJson);
             socket.emit("playerInput", {
@@ -195,6 +215,46 @@
                 }
             });
         }
+
+        let wakeLock = null;
+        let noSleep = new NoSleep();
+        let wakeLockSupported = 'wakeLock' in navigator;
+
+        // Try enabling on load
+        window.addEventListener('load', async () => {
+            if (wakeLockSupported) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake lock active!');
+                    document.addEventListener('visibilitychange', async () => {
+                        if (document.visibilityState === 'visible' && !wakeLock) {
+                            wakeLock = await navigator.wakeLock.request('screen');
+                        }
+                    });
+                    return; // done!
+                } catch (err) {
+                    console.warn('Wake Lock API failed:', err);
+                }
+            }
+
+            // Fallback: NoSleep.js, but requires a user gesture on iOS/Android
+            const enableNoSleep = () => {
+                noSleep.enable();
+                console.log('NoSleep enabled (fallback)');
+                document.removeEventListener('touchstart', enableNoSleep);
+                document.removeEventListener('click', enableNoSleep);
+            };
+
+            // If it can’t autoplay immediately, wait for a first interaction
+            try {
+                noSleep.enable(); // try immediately
+                console.log('NoSleep enabled immediately');
+            } catch {
+                // If blocked, wait for first user gesture
+                document.addEventListener('touchstart', enableNoSleep, { once: true });
+                document.addEventListener('click', enableNoSleep, { once: true });
+            }
+        });
 
         // Register events
         forwardToUnity("unityEvent", "OnWebGLUnityEvent", { log: true });
