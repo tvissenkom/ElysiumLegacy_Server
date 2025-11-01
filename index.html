@@ -159,7 +159,10 @@
 
         function joinRoomWebGL(roomCode, playerName) {
             socket.emit("joinRoom", { roomCode, playerName }, (response) => {
-                window.RoomCode = roomCode;
+
+                window.RoomCode = response.roomCode;
+                window.playerId = response.playerId;
+
                 const jsonResponse = JSON.stringify(response);
                 window.unityInstance.SendMessage("NetworkManager", "OnWebGLJoinRoomResponse", jsonResponse);
             });
@@ -183,15 +186,6 @@
                     console.log("Reconnection failed, joining as new player...");
                     socket.emit('joinRoom', { roomCode, playerName }, handleJoinResponse);
                 }
-            });
-        }
-
-        WebGLReconnectPlayer: function(roomCodePtr, playerIdPtr) {
-            const roomCode = UTF8ToString(roomCodePtr);
-            const playerId = UTF8ToString(playerIdPtr); // decode the playerId properly
-            socket.emit("reconnectPlayer", { roomCode, playerId }, (response) => {
-                const result = JSON.stringify(response);
-                unityInstance.SendMessage("YourNetworkManagerGameObjectName", "HandleReconnectResult", result);
             });
         }
 
@@ -292,6 +286,10 @@
         forwardToUnity("invent", "OnWebGLpressItem");
 
         socket.on("connect", () => console.log("WebGL Connected"));
+        socket.on("connect", () => {
+            reconnect(window.RoomCode, window.playerId);
+        });
+
     </script>
 </body>
 </html>
