@@ -165,7 +165,17 @@
             });
         }
 
+        function disconnectWebGL() {
+            if (socket && socket.connected) {
+                console.log("Disconnecting from server...");
+                socket.disconnect();
+            } else {
+                console.warn("Socket not connected or already disconnected.");
+            }
+        }
+
         function reconnect(roomCode, playerName) {
+            console.log("Reconnection attempt for: " + playerId);
             socket.emit('reconnectPlayer', { roomCode, playerId }, (response) => {
                 if (response.success) {
                     console.log("Reconnected as", response.playerName);
@@ -176,11 +186,12 @@
             });
         }
 
-        function reconnectPlayerWebGL(roomCode, playerId) {
+        WebGLReconnectPlayer: function(roomCodePtr, playerIdPtr) {
+            const roomCode = UTF8ToString(roomCodePtr);
+            const playerId = UTF8ToString(playerIdPtr); // decode the playerId properly
             socket.emit("reconnectPlayer", { roomCode, playerId }, (response) => {
-                window.RoomCode = roomCode;
-                const jsonResponse = JSON.stringify(response);
-                window.unityInstance.SendMessage("NetworkManager", "OnWebGLReconnectResponse", jsonResponse);
+                const result = JSON.stringify(response);
+                unityInstance.SendMessage("YourNetworkManagerGameObjectName", "HandleReconnectResult", result);
             });
         }
 
