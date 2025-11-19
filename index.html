@@ -190,14 +190,12 @@
         }
 
         function sendInputWebGL(inputType, valueJson) {
-            //const value = JSON.parse(valueJson);
             socket.emit("playerInput", {
                 inputType,
-                value: valueJson,
+                value: valueJson,  // <-- Send as string, not parsed object
                 roomCode: window.RoomCode,
                 playerId: window.playerId
             });
-            console.log(window.playerId);
         }
 
         // Utility function to forward socket events to Unity
