@@ -162,6 +162,7 @@
 
                 window.RoomCode = response.roomCode;
                 window.playerId = response.playerId;
+                window.playerName = response.playerName;
 
                 const jsonResponse = JSON.stringify(response);
                 window.unityInstance.SendMessage("NetworkManager", "OnWebGLJoinRoomResponse", jsonResponse);
