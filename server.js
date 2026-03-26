@@ -77,7 +77,8 @@ io.on('connection', (socket) => {
 
         if (room) {
             const playerId = nextPlayerId++;
-            room.players[playerId] = { socketId: socket.id, name: data.playerName || `Player ${playerId}` };
+            const roomPlayerNumber = Object.keys(room.players).length + 1;
+            room.players[playerId] = { socketId: socket.id, name: data.playerName || `Player ${roomPlayerNumber}` };
             socket.join(roomCode); // Player joins the room
 
             console.log(`Player <span class="math-inline">\{playerId\} \(</span>{data.playerName}) joined room ${roomCode}`);
