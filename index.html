@@ -162,7 +162,7 @@
 
                 window.RoomCode = response.roomCode;
                 window.playerId = response.playerId;
-                window.playerName = response.playerName;
+                window.playerName = playerName;
 
                 const jsonResponse = JSON.stringify(response);
                 window.unityInstance.SendMessage("NetworkManager", "OnWebGLJoinRoomResponse", jsonResponse);
@@ -286,7 +286,10 @@
 
         socket.on("connect", () => console.log("WebGL Connected"));
         socket.on("connect", () => {
-            reconnect(window.RoomCode, window.playerId);
+            // Only reconnect after this page has joined a room; on first load there is nothing to restore
+            if (window.RoomCode && window.playerId) {
+                reconnect(window.RoomCode, window.playerName);
+            }
         });
 
     </script>
