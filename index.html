@@ -185,7 +185,7 @@
                     console.log("Reconnected as", response.playerName);
                 } else {
                     console.log("Reconnection failed, joining as new player...");
-                    socket.emit('joinRoom', { roomCode, playerName }, handleJoinResponse);
+                    joinRoomWebGL(roomCode, playerName);
                 }
             });
         }
