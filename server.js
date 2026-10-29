@@ -43,6 +43,10 @@ io.on('connection', (socket) => {
 
     // == Game Client (Unity Desktop) Events ==
     socket.on('createRoom', (callback) => {
+        if (typeof callback !== 'function') {
+            console.warn('createRoom received without an acknowledgement callback');
+            return;
+        }
         let roomCode;
         do {
             roomCode = Math.random().toString(36).substring(2, 7).toUpperCase(); // Generate simple 5-char code
@@ -59,12 +63,20 @@ io.on('connection', (socket) => {
 
     // Forward messages from game to specific player(s) or all players in room
     socket.on('messageToPlayer', (data) => { // { roomCode, playerId, eventName, payload }
+        if (!data || typeof data !== 'object') {
+            console.warn('Invalid messageToPlayer payload:', data);
+            return;
+        }
         const player = rooms[data.roomCode]?.players[data.playerId];
         if (player) {
             io.to(player.socketId).emit(data.eventName, data.payload);
         }
     });
     socket.on('messageToRoom', (data) => { // { roomCode, eventName, payload }
+        if (!data || typeof data.roomCode !== 'string') {
+            console.warn('Invalid messageToRoom payload:', data);
+            return;
+        }
         // Send to all players *except* the game client itself if needed
         io.to(data.roomCode).except(rooms[data.roomCode]?.gameSocketId).emit(data.eventName, data.payload);
     });
@@ -72,6 +84,14 @@ io.on('connection', (socket) => {
 
     // == Player Client (WebGL) Events ==
     socket.on('joinRoom', (data, callback) => { // data = { roomCode, playerName }
+        if (typeof callback !== 'function') {
+            console.warn('joinRoom received without an acknowledgement callback');
+            return;
+        }
+        if (!data || typeof data.roomCode !== 'string') {
+            console.warn('Invalid joinRoom payload:', data);
+            return callback({ success: false, message: 'Invalid payload' });
+        }
         const roomCode = data.roomCode.toUpperCase();
         const room = rooms[roomCode];
 
@@ -102,9 +122,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('reconnectPlayer', (data, callback) => {
+        if (typeof callback !== 'function') {
+            console.warn('reconnectPlayer received without an acknowledgement callback');
+            return;
+        }
         if (!data || typeof data !== 'object') {
             console.warn('Invalid reconnectPlayer payload:', data);
-            return callback?.({ success: false, message: 'Invalid payload' });
+            return callback({ success: false, message: 'Invalid payload' });
         }
         const { roomCode, playerId } = data;
         const room = rooms[roomCode];
@@ -142,6 +166,10 @@ io.on('connection', (socket) => {
 
     // Receive input from a player and forward it to the game client
     socket.on('playerInput', (data) => { // data = { roomCode, playerId, inputType, value }
+        if (!data || typeof data !== 'object') {
+            console.warn('Invalid playerInput payload:', data);
+            return;
+        }
         const room = rooms[data.roomCode];
         if (room && room.players[data.playerId]?.socketId === socket.id) {
             console.log(`Input from player ${data.playerId} in room ${data.roomCode}:`, data.value);
