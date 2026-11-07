@@ -279,6 +279,7 @@
             after: (data) => data.map(d => d.playerId)
         });
         forwardToUnity("addResources", "OnWebGLAddResources");
+        forwardToUnity("revive", "OnWebGLRevive");
         forwardToUnity("addItem", "OnWebGLAddItem", {
             after: (data) => { window.integer = data.playerId; }
         });
