@@ -280,6 +280,7 @@
         });
         forwardToUnity("addResources", "OnWebGLAddResources");
         forwardToUnity("revive", "OnWebGLRevive");
+        forwardToUnity("UpdateHelpStats", "OnWebGLUpdateHelpStats");
         forwardToUnity("addItem", "OnWebGLAddItem", {
             after: (data) => { window.integer = data.playerId; }
         });
